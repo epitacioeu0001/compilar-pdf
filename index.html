@@ -509,9 +509,58 @@ PERFORMANCE OF THIS SOFTWARE.
       .about-links .contact-text { display: flex; align-items: center; gap: 8px; min-height: 29px; color: var(--ink); text-decoration: none; font-size: 10.5px; font-weight: 600; }
       .about-links .contact-text { cursor: default; }
       .about-links .contact-text svg { width: 14px; color: var(--green); }
+      .access-counter { position: absolute; top: calc(100% + 10px); left: 0; width: 100%; min-height: 132px; padding: 22px; border: 1px solid rgba(30,40,38,.12); border-radius: 22px; background: #fffdf8d4; box-shadow: var(--shadow); }
+      .access-counter-label { display: block; margin-bottom: 15px; color: var(--orange); font-size: 9px; font-weight: 800; letter-spacing: .16em; }
+      .access-counter-value { display: flex; align-items: center; gap: 12px; }
+      .access-counter-icon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 13px; background: var(--green-soft); color: var(--green); }
+      .access-counter-icon svg { width: 20px; height: 20px; }
+      .access-counter-number { display: block; color: var(--ink); font-family: Segoe UI Variable Display,Segoe UI,sans-serif; font-size: 25px; font-weight: 800; line-height: 1; }
+      .access-counter-text { display: block; margin-top: 5px; color: var(--muted); font-size: 10px; }
+      @media(max-width:1200px) { .about-rail { position: relative; } .access-counter { position: static; grid-column: 1 / -1; width: auto; min-height: 0; margin-top: 2px; padding: 14px 16px; } .access-counter-label { margin-bottom: 9px; } .access-counter-icon { width: 36px; height: 36px; } }
     </style>
   </head>
   <body>
     <main id="app"></main>
+    <script>
+      (() => {
+        const renderCounter = () => {
+          const about = document.querySelector('.about-rail');
+          if (!about) return;
+          let counter = about.querySelector('.access-counter');
+          if (!counter) {
+            counter = document.createElement('section');
+            counter.className = 'access-counter';
+            counter.setAttribute('aria-label', 'Contador de acessos');
+            counter.innerHTML = '<span class="access-counter-label">ACESSOS À FERRAMENTA</span><div class="access-counter-value"><span class="access-counter-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></span><span><strong class="access-counter-number">...</strong><small class="access-counter-text">aberturas da página</small></span></div>';
+            about.appendChild(counter);
+          }
+          const value = counter.querySelector('.access-counter-number');
+          if (value && Number.isFinite(window.__pdfUnicoAccessCount)) {
+            const formatted = window.__pdfUnicoAccessCount.toLocaleString('pt-BR');
+            if (value.textContent !== formatted) value.textContent = formatted;
+          }
+        };
+
+        const updateAccessCounter = response => {
+          const count = Number(response && response.value);
+          if (Number.isFinite(count)) window.__pdfUnicoAccessCount = count;
+          renderCounter();
+        };
+
+        new MutationObserver(renderCounter).observe(document.getElementById('app'), { childList: true, subtree: true });
+        renderCounter();
+
+        fetch('https://counterapi.com/api/epitaciosouza.github.io/view/compilar-pdf')
+          .then(response => {
+            if (!response.ok) throw new Error('Contador indisponível');
+            return response.json();
+          })
+          .then(updateAccessCounter)
+          .catch(() => {
+            const value = document.querySelector('.access-counter-number');
+            if (value) value.textContent = '—';
+          });
+      })();
+    </script>
   </body>
 </html>
