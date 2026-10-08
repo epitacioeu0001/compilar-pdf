@@ -543,14 +543,14 @@ PERFORMANCE OF THIS SOFTWARE.
 
         const updateAccessCounter = response => {
           const count = Number(response && response.value);
-          if (Number.isFinite(count)) window.__pdfUnicoAccessCount = count;
+          if (Number.isFinite(count)) window.__pdfUnicoAccessCount = count + 56;
           renderCounter();
         };
 
         new MutationObserver(renderCounter).observe(document.getElementById('app'), { childList: true, subtree: true });
         renderCounter();
 
-        fetch('https://counterapi.com/api/epitaciosouza.github.io/view/compilar-pdf')
+        fetch('https://abacus.jasoncameron.dev/hit/epitaciosouza-github-io/pdf-unico-pageviews-v1')
           .then(response => {
             if (!response.ok) throw new Error('Contador indisponível');
             return response.json();
